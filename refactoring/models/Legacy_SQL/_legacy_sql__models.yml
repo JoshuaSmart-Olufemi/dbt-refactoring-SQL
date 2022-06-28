@@ -1,0 +1,6 @@
+version: 2
+
+models:
+  - name: customer_orders
+    description: Demographics about each customer and their orders 
+   

@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: stripe # name of the source 
+    schema: dbt_josh # this is the schema our raw data lives in
+    database: dbt # this is the name of our database 
+
+    tables:
+      - name: payments
+
+  
