@@ -9,13 +9,14 @@ select
     round(amount/100.0,2) as order_value_dollars,
     orders.status as order_status,
     payments.status as payment_status
-from dbt.dbt_josh.orders as orders
+from {{ source('excel','orders') }} as orders
+
 
 join (
       select 
         first_name || ' ' || last_name as name, 
         * 
-      from dbt.dbt_josh.customers
+      from {{ source('excel','customers') }}
 ) customers
 on orders.user_id = customers.id
 
@@ -39,18 +40,18 @@ join (
       select 
         row_number() over (partition by user_id order by order_date, id) as user_order_seq,
         *
-      from dbt.dbt_josh.orders
+      from {{ source('excel','orders') }} 
     ) a
 
     join ( 
       select 
         first_name || ' ' || last_name as name, 
         * 
-      from dbt.dbt_josh.customers
+      from {{ source('excel','customers') }}
     ) b
     on a.user_id = b.id
 
-    left outer join dbt.dbt_josh.payments c
+    left outer join {{ source('stripe','payments') }} c
     on a.id = c.order_id
 
     where a.status NOT IN ('pending') and c.status != 'fail'
@@ -60,7 +61,7 @@ join (
 ) customer_order_history
 on orders.user_id = customer_order_history.customer_id
 
-left outer join dbt.dbt_josh.payments payments
+left outer join {{ source('stripe','payments') }} payments
 on orders.id = payments.order_id
 
 where payments.status != 'fail'
